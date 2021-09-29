@@ -11,9 +11,15 @@
   @			\at(a[n - 1], L) != num ==> count{L}(a, num, n) == count{L}(a, num, n - 1);
   @ }
   @*/
-/*@ predicate sorted{L}(int *a, integer first, integer last) =
-  @	\forall integer i;
-  @		first < i < last ==> \at(a[i - 1], L) <= \at(a[i], L);
+/*@ axiomatic SORTED {
+  @ 	logic boolean sorted{L}(int *a, integer first, integer last);
+  @	axiom sorted_empty{L}:
+  @		\forall int *a, integer f, l;
+  @			(l - f) < 2 ==> sorted{L}(a, f, l) == \true;
+  @	axiom sorted_non_empty{L}:
+  @		\forall int *a, integer f, l;
+  @			sorted{L}(a, f, l - 1) ==> sorted{L}(a, f, l) == (\at(a[l - 2], L) <= \at(a[l - 1], L));
+  @ }
   @*/
 /*@ predicate greatest{L}(int *a, integer last) =
   @ 	\forall integer i;
@@ -66,8 +72,12 @@ void bubble_sort(int *a, int n) {
 				tmp = a[j];
 				a[j] = a[j + 1];
 				a[j + 1] = tmp;
+				//@ assert mequal{Pre, Here}(a, n);
 			}
 		}
+		//@ assert sorted{Here}(a, n - i, n);
+		//@ assert greatest{Here}(a, n - i - 1);
+		//@ assert sorted{Here}(a, n - i - 1, n);
 	}
 
 	//@ assert sorted(a, n - i - 1, n);
